@@ -11,7 +11,7 @@ const PATHS = {
     static: __dirname + '/static'
 };
 
-const port = 1234;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
@@ -34,6 +34,6 @@ app.get('/constants', (req, res) => {
     res.send(JSON.stringify(constants));
 });
 
-http.listen(port, () => {
-    console.log(`Server listening at port ${port}`);
+http.listen(PORT, () => {
+    console.log(`Server listening at port ${PORT}`);
 });
