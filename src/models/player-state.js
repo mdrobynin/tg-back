@@ -1,26 +1,47 @@
-const constants = require('../config/constants');
-const config = require('../config/config');
-const Helpers = require('../utils/helpers');
+const { DIRECTIONS } = require('../config/constants');
+const {
+    CANVAS_SIZE,
+    BLOCKS_COUNT,
+    PLAYER_SPEED
+} = require('../config/config');
+const {
+    checkBoundaries,
+    checkTerrainInDirection
+} = require('../utils/helpers');
 
 class PlayerState {
     constructor(coordinates, id) {
+        const deltaToCenter = (CANVAS_SIZE / BLOCKS_COUNT) / 2;
+
         this.id = id;
-        const size = (config.CANVAS_SIZE / config.BLOCKS_COUNT) / 2;
-        this.coordinates = { x: coordinates.x + size, y: coordinates.y + size };
-        this.direction = constants.directions.up;
+        this.coordinates = {
+            x: coordinates.x + deltaToCenter,
+            y: coordinates.y + deltaToCenter
+        };
+        this.score = 0;
+        this.isMoving = false;
+        this.isFiring = false;
+        this.canFire = true;
+        this.direction = DIRECTIONS.UP.name;
     }
 
     move(direction, terrainInDirection1, terrainInDirection2) {
         this.direction = direction;
+        const { x, y } = this.coordinates;
         const nextPosition = {
-            x: this.coordinates.x + this.direction.x * config.player.speed,
-            y: this.coordinates.y + this.direction.y * config.player.speed
+            x: x + this.direction.x * PLAYER_SPEED,
+            y: y + this.direction.y * PLAYER_SPEED
         };
-        if (Helpers.checkBoundaries(nextPosition) &&
-            Helpers.checkTerrainInDirection(this, terrainInDirection1) &&
-            Helpers.checkTerrainInDirection(this, terrainInDirection2)) {
+
+        if (checkBoundaries(nextPosition) &&
+            checkTerrainInDirection(this, terrainInDirection1) &&
+            checkTerrainInDirection(this, terrainInDirection2)) {
             this.coordinates = nextPosition;
         }
+    }
+
+    increaseScore() {
+        this.score += 1;
     }
 }
 

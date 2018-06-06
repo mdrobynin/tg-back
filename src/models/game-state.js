@@ -1,7 +1,15 @@
-const constants = require('../config/constants');
-const config = require('../config/config');
-const TerrainFactory = require('../utils/terrain-factory');
-const Helpers = require('../utils/helpers');
+const {
+    TERRAIN_TYPES,
+    DIRECTIONS
+} = require('../config/constants');
+const {
+    checkBoundariesForBullet,
+    getRandomGrassTerrain,
+    findTerrainByCoordinates,
+    createTerrain,
+    checkBulletIsHittingPlayer,
+    checkBulletIsHittingBarrier
+} = require('../utils/helpers');
 
 class GameState {
     constructor() {
@@ -12,15 +20,14 @@ class GameState {
         this.playersToDelete = [];
         this.barriersToDelete = [];
         this.barriers = [];
-        this._createTerrain();
+        this._initializeTerrain();
     }
 
     handleBulletsMovement() {
-        this.bullets.forEach(b => {
-            const isInScreen = b.move();
-            if (!isInScreen) {
-                this.bulletsToDelete.push(b);
-            }
+        this.bullets.forEach(bullet => {
+            bullet.move();
+            const isInScreen = checkBoundariesForBullet(bullet.coordinates);
+            if (!isInScreen) this.bulletsToDelete.push(bullet);
         });
     }
 
@@ -29,48 +36,49 @@ class GameState {
         this.bulletsToDelete = [];
         this.playersToDelete = [];
 
-        this.bullets.forEach(b => {
-            this.players.filter(x => x !== b.player).forEach(p => {
-                if (Helpers.checkBulletIsHittingPlayer(b.coordinates, p.coordinates)) {
-                    this.playersToDelete.push(p);
-                    this.bulletsToDelete.push(b);
+        this.bullets.forEach(bullet => {
+            this.players.filter(player => player !== bullet.player).forEach(player => {
+                if (checkBulletIsHittingPlayer(bullet.coordinates, player.coordinates)) {
+                    this.playersToDelete.push(player);
+                    this.bulletsToDelete.push(bullet);
+                    if (bullet.player) {
+                        bullet.player.increaseScore();
+                    }
                 }
             });
-            this.barriers.forEach(bar => {
-                if (Helpers.checkBulletIsHittingBarrier(b.coordinates, bar)) {
-                    this.barriersToDelete.push(bar);
-                    this.bulletsToDelete.push(b);
+            this.barriers.forEach(barrier => {
+                if (checkBulletIsHittingBarrier(bullet.coordinates, barrier)) {
+                    this.barriersToDelete.push(barrier);
+                    this.bulletsToDelete.push(bullet);
                 }
             });
         });
     }
 
     removeOutOfScreenBullets() {
-        this.bullets = this.bullets.filter(b => this.bulletsToDelete.indexOf(b) === -1);
-    }
-
-    removePlayerBullets(player) {
-        this.bullets = this.bullets.filter(b => b.player !== player);
+        this.bullets = this.bullets.filter(bullet => this.bulletsToDelete.indexOf(bullet) === -1);
     }
 
     removeBrokenWalls() {
-        this.barriersToDelete.forEach(b => {
-            if (b.type === constants.terrainTypes.wall) {
-                b.type = constants.terrainTypes.grass;
-                this.barriers.splice(this.barriers.indexOf(b), 1);
+        this.barriersToDelete.forEach(barrier => {
+            if (barrier.type === TERRAIN_TYPES.WALL) {
+                barrier.type = TERRAIN_TYPES.GRASS;
+                this.barriers.splice(this.barriers.indexOf(barrier), 1);
             }
         });
     }
 
     removeDeadPlayers() {
-        this.players = this.players.filter(p => this.playersToDelete.indexOf(p) === -1);
+        this.players = this.players.filter(player => this.playersToDelete.indexOf(player) === -1);
+    }
+
+    removePlayerBullets(player) {
+        this.bullets = this.bullets.filter(bullet => bullet.player !== player);
     }
 
     removePlayerIfExists(player) {
         const playerIndex = this.players.indexOf(player);
-        if (playerIndex !== -1) {
-            this.players.splice(playerIndex, 1);
-        }
+        if (playerIndex !== -1) this.players.splice(playerIndex, 1);
     }
 
     addBullet(bullet) {
@@ -87,62 +95,35 @@ class GameState {
         return this._getRelativeTerrain(indexes, direction);
     }
 
-    getRandomGrassTerrain() {
-        const grassTerrains = [];
-        for (let i = 0; i < config.BLOCKS_COUNT; i++) {
-            for (let j = 0; j < config.BLOCKS_COUNT; j++) {
-                if (this.terrain[i][j].type === constants.terrainTypes.grass) {
-                    grassTerrains.push(this.terrain[i][j]);
-                }
-            }
-        }
-        const n = Math.floor(Math.random() * grassTerrains.length);
-        return grassTerrains[n];
+    getRandomGrassTerrainCoordinates() {
+        return getRandomGrassTerrain(this.terrain).coordinates;
     }
 
-    _getRelativeTerrain({i, j}, direction) {
-        switch (direction) {
-            case constants.directions.up:
-                if (this.terrain[i - 1]) {
-                    return this.terrain[i - 1][j];
-                }
-                break;
-            case constants.directions.down:
-                if (this.terrain[i + 1]) {
-                    return this.terrain[i + 1][j];
-                }
-                break;
-            case constants.directions.left:
+    _getRelativeTerrain({ i, j }, direction) {
+        const { UP, DOWN, LEFT, RIGHT } = DIRECTIONS;
+
+        switch (direction.name) {
+            case UP.name:
+                if (!this.terrain[i - 1]) return;
+                return this.terrain[i - 1][j];
+            case DOWN.name:
+                if (!this.terrain[i + 1]) return;
+                return this.terrain[i + 1][j];
+            case LEFT.name:
                 return this.terrain[i][j - 1];
-            case constants.directions.right:
+            case RIGHT.name:
                 return this.terrain[i][j + 1];
         }
     }
 
-    _findTerrainByCoordinates({x, y}) {
-        for (let i = 0; i < config.BLOCKS_COUNT; i++) {
-            for (let j = 0; j < config.BLOCKS_COUNT; j++) {
-                let { xMin, yMin, xMax, yMax } = this.terrain[i][j];
-                if (x >= xMin && y >= yMin && x <= xMax && y <= yMax) {
-                    return { i, j };
-                }
-            }
-        }
+    _findTerrainByCoordinates({ x, y }) {
+        return findTerrainByCoordinates({ x, y }, this.terrain);
     }
 
-    _createTerrain() {
-        const terrainFactory = new TerrainFactory();
-        for (let i = 0; i < config.BLOCKS_COUNT; i++) {
-            const arr = [];
-            for (let j = 0; j < config.BLOCKS_COUNT; j++) {
-                const terrain = terrainFactory.getTerrain({ i, j });
-                arr.push(terrain);
-                if (terrain.type !== constants.terrainTypes.grass) {
-                    this.barriers.push(terrain);
-                }
-            }
-            this.terrain.push(arr);
-        }
+    _initializeTerrain() {
+        const { terrain, barriers } = createTerrain();
+        this.terrain = terrain;
+        this.barriers = barriers;
     }
 }
 

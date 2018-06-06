@@ -1,60 +1,56 @@
 const PlayerState = require('../models/player-state');
 const BulletState = require('../models/bullet-state');
-const config = require('../config/config');
-const Helpers = require('../utils/helpers');
+const { BULLET_FIRE_DELAY } = require('../config/config');
+const {
+    getPlayerFrontPoints,
+    getDirectionFromEvent
+} = require('../utils/helpers');
 
 class Controller {
-    constructor(observable, gameState, socketId) {
-        this.socketId = socketId;
-        this.observable = observable;
+    constructor(gameState) {
         this.gameState = gameState;
-        this._initialize();
+        this.players = gameState.players;
     }
 
-    _initialize() {
-        this.currentDirection = undefined;
-        this.isPlayerMoving = false;
-        this.isPlayerFiring = false;
-        this.canPlayerFire = true;
+    addPlayer(player, observable) {
+        this.gameState.addPlayer(player);
+        this.players = this.gameState.players;
+        observable.subscribe((event) => {
+            const direction = getDirectionFromEvent(event);
 
-        this.player = new PlayerState(this.gameState.getRandomGrassTerrain().coordinates, this.socketId);
-        this.gameState.addPlayer(this.player);
-        this._listenEvents();
+            player.direction = direction || player.direction;
+            player.isFiring = !direction ? event.status : false;
+            player.isMoving = direction ? event.status : false;
+        });
     }
 
     handleMainTick() {
-        if (this.isPlayerMoving) {
-            const {rightPoint, leftPoint} = Helpers.getPlayerFrontPoints(this.player.coordinates, this.currentDirection);
-            const terrain1 = this.gameState.getTerrainInDirection(rightPoint, this.currentDirection);
-            const terrain2 = this.gameState.getTerrainInDirection(leftPoint, this.currentDirection);
-            this.player.move(this.currentDirection, terrain1, terrain2);
-        }
-        if (this.isPlayerFiring) this._playerFireHandler();
-    }
+        this.players.forEach(player => {
+            if (player.isMoving) {
+                const { rightPoint, leftPoint } = getPlayerFrontPoints(player.coordinates, player.direction);
+                const terrain1 = this.gameState.getTerrainInDirection(rightPoint, player.direction);
+                const terrain2 = this.gameState.getTerrainInDirection(leftPoint, player.direction);
 
-    onDelete() {
-        this.isPlayerFiring = false;
-        this.gameState.removePlayerBullets(this.player);
-        this.gameState.removePlayerIfExists(this.player);
-    }
-
-    _playerFireHandler() {
-        if (this.canPlayerFire) {
-            this.gameState.addBullet(new BulletState(this.player));
-            this.canPlayerFire = false;
-            setTimeout(() => {
-                this.canPlayerFire = true;
-            }, config.bullet.fireDelay);
-        }
-    }
-
-    _listenEvents() {
-        this.observable.subscribe((event) => {
-            const direction = Helpers.getDirectionFromEvent(event);
-            this.currentDirection = direction || this.currentDirection;
-            this.isPlayerFiring = !direction ? event.status : false;
-            this.isPlayerMoving = direction ? event.status : false;
+                player.move(player.direction, terrain1, terrain2);
+            }
+            if (player.isFiring) this._playerFireHandler(player);
         });
+    }
+
+    removePlayer(player) {
+        player.isFiring = false;
+        this.gameState.removePlayerBullets(player);
+        this.gameState.removePlayerIfExists(player);
+    }
+
+    _playerFireHandler(player) {
+        if (player.canFire) {
+            this.gameState.addBullet(new BulletState(player));
+            player.canFire = false;
+            setTimeout(() => {
+                player.canFire = true;
+            }, BULLET_FIRE_DELAY);
+        }
     }
 }
 

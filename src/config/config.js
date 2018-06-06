@@ -1,22 +1,16 @@
 const config = {
     CANVAS_SIZE: 600,
     BLOCKS_COUNT: 15,
-    KEYS: {
-        up: 87,
-        left: 65,
-        right: 68,
-        down: 83,
-        fire: 32
-    },
-    player: {
-        speed: 5,
-        size: 30
-    },
-    bullet: {
-        speed: 12,
-        size: 5,
-        fireDelay: 300
-    }
+    KEY_UP: 87,
+    KEY_LEFT: 65,
+    KEY_RIGHT: 68,
+    KEY_DOWN: 83,
+    KEY_FIRE: 32,
+    PLAYER_SPEED: 5,
+    PLAYER_SIZE: 30,
+    BULLET_SPEED: 12,
+    BULLET_SIZE: 5,
+    BULLET_FIRE_DELAY: 300
 };
 
 module.exports = config;

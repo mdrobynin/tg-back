@@ -1,89 +1,139 @@
-const config = require('../config/config');
-const constants = require('../config/constants');
+const {
+    PLAYER_SIZE,
+    CANVAS_SIZE,
+    PLAYER_SPEED,
+    BLOCKS_COUNT
+} = require('../config/config');
+const {
+    TERRAIN_TYPES,
+    DIRECTIONS,
+    CLICK_EVENTS
+} = require('../config/constants');
+const TerrainFactory = require('./terrain-factory');
 
 class Helpers {
     static getDirectionFromEvent(event) {
-        switch (event.name) {
-            case constants.events.click.up:
-                return constants.directions.up;
-            case constants.events.click.down:
-                return constants.directions.down;
-            case constants.events.click.left:
-                return constants.directions.left;
-            case constants.events.click.right:
-                return constants.directions.right;
-        }
+        return Object.keys(DIRECTIONS)
+            .map(key => DIRECTIONS[key])
+            .find(direction => direction.eventName === event.name);
     }
 
     static checkBulletIsHittingPlayer(bulletPos, playerPos) {
-        const size = config.player.size / 2 - 3;
+        const size = PLAYER_SIZE / 2 - 3;
         const inX = bulletPos.x >= playerPos.x - size && bulletPos.x <= playerPos.x + size;
         const inY = bulletPos.y >= playerPos.y - size && bulletPos.y <= playerPos.y + size;
+
         return inX && inY;
     }
 
-    static checkBulletIsHittingBarrier(bulletPos, barrier) {
-        const inX = bulletPos.x >= barrier.xMin && bulletPos.x <= barrier.xMax;
-        const inY = bulletPos.y >= barrier.yMin && bulletPos.y <= barrier.yMax;
+    static checkBulletIsHittingBarrier({ x, y }, { xMin, xMax, yMin, yMax}) {
+        const inX = x >= xMin && x <= xMax;
+        const inY = y >= yMin && y <= yMax;
+
         return inX && inY;
     }
 
     static checkBoundariesForBullet({ x, y }) {
-        return x > 0 && x < config.CANVAS_SIZE && y > 0 && y < config.CANVAS_SIZE;
+        return x > 0 && x < CANVAS_SIZE && y > 0 && y < CANVAS_SIZE;
     }
 
     static checkBoundaries({ x, y }) {
-        const size = config.player.size / 2 - 3;
-        return x > size && x < config.CANVAS_SIZE - size && y > size && y < config.CANVAS_SIZE - size;
+        const size = PLAYER_SIZE / 2 - 3;
+        return x > size && x < CANVAS_SIZE - size && y > size && y < CANVAS_SIZE - size;
     }
 
     static checkTerrainInDirection(player, terrainInDirection) {
-        if (!terrainInDirection) return true;
-        if (terrainInDirection.type === constants.terrainTypes.grass) return true;
-        const size = config.player.size / 2;
+        if (!terrainInDirection || terrainInDirection.type === TERRAIN_TYPES.GRASS) return true;
+        const size = PLAYER_SIZE / 2;
         const { x, y } = player.coordinates;
         const { xMin, yMin, xMax, yMax } = terrainInDirection;
-        const { up, down, left, right } = constants.directions;
+        const { UP, DOWN, LEFT, RIGHT } = DIRECTIONS;
 
-        if (player.direction === up || player.direction === down) {
-            return Math.min(Math.abs(yMin - y), Math.abs(yMax - y)) > size + config.player.speed;
+        if (player.direction.name === UP.name || player.direction.name === DOWN.name) {
+            return Math.min(Math.abs(yMin - y), Math.abs(yMax - y)) > size + PLAYER_SPEED;
         }
 
-        if (player.direction === left || player.direction === right) {
+        if (player.direction.name === LEFT.name || player.direction.name === RIGHT.name) {
             return Math.min(Math.abs(xMin - x), Math.abs(xMax - x)) > size;
         }
     }
 
     static getPlayerFrontPoints({ x, y }, direction) {
-        const size = config.player.size / 2 - 3;
-        const nextPosition = {
-            x: x + direction.x * config.player.speed,
-            y: y + direction.y * config.player.speed
-        };
-        const { up, down, left, right } = constants.directions;
+        const size = PLAYER_SIZE / 2 - 3;
+        const nextX = x + direction.x * PLAYER_SPEED;
+        const nextY = y + direction.y * PLAYER_SPEED;
+        const { UP, DOWN, LEFT, RIGHT } = DIRECTIONS;
 
-        switch (direction) {
-            case up:
+        switch (direction.name) {
+            case UP.name:
                 return {
-                    rightPoint: { x: nextPosition.x + size, y: nextPosition.y - size},
-                    leftPoint: { x: nextPosition.x - size, y: nextPosition.y - size}
+                    rightPoint: { x: nextX + size, y: nextY - size },
+                    leftPoint: { x: nextX - size, y: nextY - size }
                 };
-            case down:
+            case DOWN.name:
                 return {
-                    rightPoint: { x: nextPosition.x + size, y: nextPosition.y + size},
-                    leftPoint: { x: nextPosition.x - size, y: nextPosition.y + size}
+                    rightPoint: { x: nextX + size, y: nextY + size },
+                    leftPoint: { x: nextX - size, y: nextY + size }
                 };
-            case left:
+            case LEFT.name:
                 return {
-                    rightPoint: { x: nextPosition.x + size, y: nextPosition.y + size},
-                    leftPoint: { x: nextPosition.x + size, y: nextPosition.y - size}
+                    rightPoint: { x: nextX + size, y: nextY + size },
+                    leftPoint: { x: nextX + size, y: nextY - size }
                 };
-            case right:
+            case RIGHT.name:
                 return {
-                    rightPoint: { x: nextPosition.x - size, y: nextPosition.y + size},
-                    leftPoint: { x: nextPosition.x - size, y: nextPosition.y - size}
+                    rightPoint: { x: nextX - size, y: nextY + size },
+                    leftPoint: { x: nextX - size, y: nextY - size }
                 };
         }
+    }
+
+    static getRandomGrassTerrain(terrain) {
+        const grassTerrains = [];
+
+        for (let i = 0; i < BLOCKS_COUNT; i++) {
+            for (let j = 0; j < BLOCKS_COUNT; j++) {
+                if (terrain[i][j].type === TERRAIN_TYPES.GRASS) {
+                    grassTerrains.push(terrain[i][j]);
+                }
+            }
+        }
+
+        const n = Math.floor(Math.random() * grassTerrains.length);
+
+        return grassTerrains[n];
+    }
+
+    static findTerrainByCoordinates({ x, y }, terrain) {
+        for (let i = 0; i < BLOCKS_COUNT; i++) {
+            for (let j = 0; j < BLOCKS_COUNT; j++) {
+                let { xMin, yMin, xMax, yMax } = terrain[i][j];
+                if (x >= xMin && y >= yMin && x <= xMax && y <= yMax) {
+                    return { i, j };
+                }
+            }
+        }
+    }
+
+    static createTerrain() {
+        const terrain = [];
+        const barriers = [];
+        const terrainFactory = new TerrainFactory();
+
+        for (let i = 0; i < BLOCKS_COUNT; i++) {
+            const terrainRow = [];
+
+            for (let j = 0; j < BLOCKS_COUNT; j++) {
+                const terrainItem = terrainFactory.getTerrain({ i, j });
+
+                terrainRow.push(terrainItem);
+                if (terrainItem.type !== TERRAIN_TYPES.GRASS) {
+                    barriers.push(terrainItem);
+                }
+            }
+            terrain.push(terrainRow);
+        }
+        return { terrain, barriers };
     }
 }
 

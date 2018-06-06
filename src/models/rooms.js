@@ -17,7 +17,7 @@ class Rooms {
 
 class Room {
     constructor(number, gameState) {
-        this.name = `room${number}`;
+        this.name = `Room ${number}`;
         this.gameState = gameState;
     }
 }

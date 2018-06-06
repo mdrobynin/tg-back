@@ -1,9 +1,10 @@
-const constants = require('../config/constants');
+const { SOCKET_USER_ACTION_NAME } = require('../config/constants');
 
 class UserEventsObservable {
     constructor(socket) {
+        this.id = socket.id;
         this.observers = [];
-        socket.on(constants.socketUserActionName, this.fireEvent.bind(this));
+        socket.on(SOCKET_USER_ACTION_NAME, this.fireEvent.bind(this));
     }
 
     fireEvent(event, thisObj) {

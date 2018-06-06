@@ -1,11 +1,13 @@
 class TerrainState {
     constructor(coordinates, type, width) {
+        const { x, y } = coordinates;
+
         this.coordinates = coordinates;
         this.type = type;
-        this.xMin = coordinates.x;
-        this.yMin = coordinates.y;
-        this.xMax = coordinates.x + width;
-        this.yMax = coordinates.y + width;
+        this.xMin = x;
+        this.yMin = y;
+        this.xMax = x + width;
+        this.yMax = y + width;
     }
 }
 

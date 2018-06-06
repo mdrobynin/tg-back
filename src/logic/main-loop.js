@@ -1,4 +1,6 @@
-const constants = require('../config/constants');
+const {
+    SOCKET_STATE_RECEIVE_ACTION_NAME
+} = require('../config/constants');
 
 class MainLoop {
     constructor(gameState, io, roomName) {
@@ -19,9 +21,10 @@ class MainLoop {
 
     _run() {
         setInterval(() => {
+            const gameState = JSON.stringify(this.gameState);
+
             this.callbacks.forEach(c => c());
-            this.io.to(this.roomName)
-                .emit(constants.socketStateReceiveActionName, JSON.stringify(this.gameState));
+            this.io.to(this.roomName).emit(SOCKET_STATE_RECEIVE_ACTION_NAME, gameState);
         }, 1000 / 60);
     }
 }
