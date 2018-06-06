@@ -7,11 +7,11 @@ const constants = require('./config/constants');
 const cors = require('cors');
 const roomsRouter = require('./rooms-router');
 
+const PORT = process.env.PORT || 3000;
+
 const PATHS = {
     static: __dirname + '/static'
 };
-
-const port = 1234;
 
 app.use(cors());
 
@@ -32,6 +32,6 @@ app.get('/constants', (req, res) => {
     res.send(JSON.stringify(constants));
 });
 
-http.listen(port, () => {
-    console.log(`Server listening at port ${port}`);
+http.listen(PORT, () => {
+    console.log(`Server listening at port ${PORT}`);
 });
