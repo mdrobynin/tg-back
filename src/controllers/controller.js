@@ -24,6 +24,20 @@ class Controller {
         });
     }
 
+    addSourceToPlayer(playerId, observable) {
+        const player = this.gameState.players.find(player => player.id === playerId);
+
+        if (player) {
+            observable.subscribe((event) => {
+                const direction = getDirectionFromEvent(event);
+    
+                player.direction = direction || player.direction;
+                player.isFiring = !direction ? event.status : false;
+                player.isMoving = direction ? event.status : false;
+            });
+        }
+    }
+
     handleMainTick() {
         this.players.forEach(player => {
             if (player.isMoving) {

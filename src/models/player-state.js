@@ -10,10 +10,11 @@ const {
 } = require('../utils/helpers');
 
 class PlayerState {
-    constructor(coordinates, id) {
+    constructor(coordinates, id, mobileCode) {
         const deltaToCenter = (CANVAS_SIZE / BLOCKS_COUNT) / 2;
 
         this.id = id;
+        this.mobileCode = mobileCode;
         this.coordinates = {
             x: coordinates.x + deltaToCenter,
             y: coordinates.y + deltaToCenter

@@ -12,8 +12,10 @@ const constants = {
     SOCKET_JOIN_ROOM_ACTION_NAME: 'join room action',
     SOCKET_LEAVE_ROOM_ACTION_NAME: 'leave room action',
     SOCKET_GET_CONNECTION_ID_ACTION_NAME: 'get connection id action',
-    SOCKET_RECONNECT_ACTION: 'reconnect after death action',
+    SOCKET_GET_MOBILE_CODE_ACTION_NAME: 'get mobile code id action',
     SOCKET_CURRENT_ONLINE_PLAYERS_ACTION: 'current online players action',
+    SOCKET_MOBILE_JOIN_ROOM_ACTION_NAME: 'mobile join room action',
+    SOCKET_MOBILE_LEAVE_ROOM_ACTION_NAME: 'mobile leave room action',
     DIRECTIONS: {
         UP: {
             x: 0,
