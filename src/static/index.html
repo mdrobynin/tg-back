@@ -9,7 +9,7 @@
 <link href="./css/styles.css" rel="stylesheet"></head>
 <body>
 
-<div class="wrapper">
+<div class="wrapper no-display" id="desktop">
     <div id="rooms">
         <button id="create-room">Create room</button>
         <div id="rooms-container"></div>
@@ -20,7 +20,27 @@
             <canvas id="canvas-players"></canvas>
         </div>
     </div>
-    <button id="leave-room" class="no-display">Leave room</button>
+    <div class="actions">
+        <span id="mobile-code"></span>
+        <button id="leave-room" class="no-display">Leave room</button>
+    </div>
+</div>
+
+<div class="wrapper no-display" id="mobile">
+    <div id="buttons" class="no-display">
+        <button id="fire-button" class="mobile-button"></button>
+        <div class="movement-buttons">
+            <button id="button-up" class="mobile-button">></button>
+            <button id="button-down" class="mobile-button"><</button>
+            <button id="button-left" class="mobile-button">^</button>
+            <button id="button-right" class="mobile-button">v</button>
+        </div>
+    </div>
+    <div id="code-enter">
+        <div class="code-enter-title">Enter your mobile code:</div>
+        <input type="text" id="mobile-code-input">
+        <button id="mobile-code-button">Go</button>
+    </div>
 </div>
 
 <script type="text/javascript" src="main.js"></script></body>

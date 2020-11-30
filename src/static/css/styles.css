@@ -42,112 +42,185 @@ table {
 }
 .wrapper {
   height: 100vh;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  background: url(../assets/background.png) no-repeat;
+  justify-content: center;
+  align-items: center;
+  background: url(assets/background.png) no-repeat;
   background-size: cover;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column; }
+  flex-direction: column;
+}
+
+#create-room {
+  height: 30px;
+  font-size: 20px;
+  background: green;
+  color: white;
+  width: 200px;
+}
 
 #rooms {
   width: 600px;
   height: 400px;
   background: forestgreen;
   padding: 20px;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  border-radius: 10px; }
-  #rooms #create-room {
-    height: 30px;
-    font-size: 20px;
-    background: green;
-    color: white;
-    width: 200px; }
-  #rooms #rooms-container {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    width: 80%; }
-    #rooms #rooms-container .room {
-      height: 40px;
-      display: -webkit-box;
-      display: -ms-flexbox;
-      display: flex;
-      -webkit-box-align: center;
-          -ms-flex-align: center;
-              align-items: center;
-      -webkit-box-pack: justify;
-          -ms-flex-pack: justify;
-              justify-content: space-between;
-      border-radius: 10px;
-      padding: 10px 20px;
-      background: darkgreen;
-      margin: 10px 0;
-      width: 100%; }
-      #rooms #rooms-container .room__name {
-        color: white;
-        font-size: 24px; }
-      #rooms #rooms-container .room__join-button {
-        height: 30px;
-        font-size: 20px;
-        background: green;
-        color: white;
-        width: 100px; }
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+}
+
+#rooms-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+}
+
+#rooms-container .room {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  padding: 10px 20px;
+  background: darkgreen;
+  margin: 10px 0;
+  width: 100%;
+}
+
+#rooms-container .room__name {
+  color: white;
+  font-size: 24px;
+}
+
+#rooms-container .room__join-button {
+  height: 30px;
+  font-size: 20px;
+  background: green;
+  color: white;
+  width: 100px;
+}
 
 #leave-room {
   height: 30px;
   font-size: 20px;
   background: green;
   color: white;
-  margin: 5px; }
+  margin: 5px;
+}
 
 #canvas-wrapper {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center; }
-  #canvas-wrapper #canvas-container {
-    position: relative; }
-    #canvas-wrapper #canvas-container #canvas-terrain {
-      position: absolute;
-      top: 0;
-      left: 0; }
-    #canvas-wrapper #canvas-container #canvas-players {
-      position: absolute;
-      top: 0;
-      left: 0; }
+  justify-content: center;
+  align-items: center;
+}
+
+#canvas-container {
+  position: relative;
+}
+
+#canvas-terrain {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#canvas-players {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
 #canvas {
-  border: 1px solid lightgray; }
+  border: 1px solid lightgray;
+}
 
 .no-display {
-  display: none !important; }
+  display: none !important;
+}
+
+#mobile-code {
+  font-size: 20px;
+  color: white;
+}
+
+#code-enter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background: forestgreen;
+  padding: 20px;
+}
+
+.code-enter-title {
+  font-size: 24px;
+  color: white;
+  font-weight: bold;
+}
+
+#mobile-code-input {
+  margin-top: 10px;
+  width: 80%;
+  height: 30px;
+  font-size: 24px;
+}
+
+#mobile-code-button {
+  height: 40px;
+  font-size: 24px;
+  background: green;
+  color: white;
+  width: 150px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+#buttons {
+  position: relative;
+}
+
+#fire-button {
+  background-color: red;
+  top: 150px;
+  left: 50%;
+}
+
+.mobile-button {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: none;
+  font-size: 60px;
+  font-weight: bold;
+  color: rgb(59, 212, 28);
+  background-color: aquamarine;
+}
+
+.movement-buttons {
+  margin-top: 400px;
+  position: relative;
+  bottom: 160px;
+}
+
+#button-up {
+  position: absolute;
+  left: 100px;
+}
+
+#button-down {
+  position: absolute;
+  left: -100px
+}
+
+#button-left {
+  position: absolute;
+  top: -100px;
+}
+
+#button-right {
+  position: absolute;
+  top: 100px;
+}
+
