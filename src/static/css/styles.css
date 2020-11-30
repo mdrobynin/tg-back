@@ -196,6 +196,7 @@ table {
   font-weight: bold;
   color: rgb(59, 212, 28);
   background-color: aquamarine;
+  user-select: none;
 }
 
 .movement-buttons {
